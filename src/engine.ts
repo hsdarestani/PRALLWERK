@@ -2,7 +2,7 @@
 export const WIDTH=420, HEIGHT=560, DT=1/120, SPEED=570, MAX_VOLLEY_TICKS=1680;
 export type Kind='crystal'|'conductor'|'mirror'|'armor'|'core';
 export interface Tile {id:string;kind:Kind;x:number;y:number;w:number;h:number;hp:number;maxHp:number;links:string[];flip:boolean;flash:number}
-export interface Level {id:number;title:string;subtitle:string;goal:string;hint:string;maxVolleys:number;orbCount:number;tiles:Tile[]}
+export interface Level {id:number;maxVolleys:number;orbCount:number;tiles:Tile[]}
 export interface Ball {x:number;y:number;vx:number;vy:number;delay:number;alive:boolean;last:string;cooldown:number;trail:{x:number;y:number}[]}
 export interface GameEvent {type:string;x:number;y:number;toX?:number;toY?:number;value?:number;kind?:Kind}
 export interface State {level:Level;tiles:Tile[];balls:Ball[];status:'ready'|'flying'|'won'|'lost';tick:number;volleyTick:number;volley:number;hearts:number;score:number;destroyScore:number;chainScore:number;bonus:number;chains:number;bestChain:number;hits:number;returned:number;triggered:string[];pulses:{at:number;from:string;to:string}[];events:GameEvent[];inputLog:number[];capped:boolean}
@@ -62,6 +62,7 @@ export function step(s:State) {
   for(const p of due){const a=s.tiles.find(t=>t.id===p.from)!,b=s.tiles.find(t=>t.id===p.to)!;s.events.push({type:'pulse',x:a.x+a.w/2,y:a.y+a.h/2,toX:b.x+b.w/2,toY:b.y+b.h/2});damage(s,b,2,true);}
   for(const b of s.balls){if(!b.alive)continue;if(b.delay>0){b.delay--;continue;}b.cooldown=Math.max(0,b.cooldown-1);b.x+=b.vx*DT;b.y+=b.vy*DT;
     b.trail.push({x:b.x,y:b.y});if(b.trail.length>9)b.trail.shift();
+    if(b.x<23||b.x>397||b.y<25)s.events.push({type:"wall",x:b.x,y:b.y});
     if(b.x<23){b.x=46-b.x;b.vx=Math.abs(b.vx);}if(b.x>397){b.x=794-b.x;b.vx=-Math.abs(b.vx);}if(b.y<25){b.y=50-b.y;b.vy=Math.abs(b.vy);}
     if(b.y>535&&b.vy>0){b.alive=false;s.returned++;continue;}
     for(const t of s.tiles){if(t.hp<=0||b.cooldown>0&&b.last===t.id)continue;const hit=t.kind==='mirror'?reflectMirror(b,t):reflectRect(b,t);if(hit){b.last=t.id;b.cooldown=3;if(t.kind==='mirror')emit(s,'mirror',t);else damage(s,t);break;}}

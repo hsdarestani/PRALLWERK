@@ -12,7 +12,12 @@ dialog{padding:0;max-height:90svh;width:min(460px,calc(100% - 24px));border:1px 
 @media(max-height:530px) and (orientation:landscape){.game-active .bar{min-height:44px}.game-screen{display:grid;grid-template-columns:minmax(145px,210px) auto;gap:20px}.brief{display:block}.brief-body{margin:7px 0}.brief h1{font-size:27px}.brief-tip,.record{font-size:12px}.record{padding:7px 0}.cabinet{width:clamp(175px,calc((100svh - 166px)*.75),260px);min-width:0}.game-title{display:none}.hud{height:30px}.hud small,.core-hud{font-size:8px}.hud strong{font-size:12px}.control-hint{display:none}.deck{min-height:18px}.game-active footer{display:none}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
 .bar .icon,.lang button,.dialog-head .icon{min-width:44px;min-height:44px}
-@media(max-width:360px){.bar{padding-inline:8px}.brand{font-size:20px}.utilities{gap:3px}}
+@media(max-width:360px){
+  .bar{padding-inline:6px;gap:4px}
+  .brand{font-size:17px;gap:3px}
+  .brand svg{width:17px}
+  .utilities{gap:0}
+}
 .hero-art:before{inset-inline:0}
 @media(max-height:530px) and (orientation:landscape){
   .cabinet{position:relative}

@@ -17,7 +17,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: pip install playwright==1.55.0 && python -m playwright install --with-deps chromium
+      - name: Prepare the browser
+        run: |
+          pip install playwright==1.55.0
+          if command -v google-chrome >/dev/null; then
+            echo "CHROME_BIN=$(command -v google-chrome)" >> "$GITHUB_ENV"
+            google-chrome --version
+          else
+            python -m playwright install --with-deps chromium
+          fi
       - name: Play both original levels with mouse and touch
         env:
           BASELINE_URL: http://127.0.0.1:4174

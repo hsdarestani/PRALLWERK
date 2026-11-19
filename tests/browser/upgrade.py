@@ -158,7 +158,7 @@ def layouts(browser):
         p.close()
 
 with sync_playwright() as pw:
-    browser=pw.chromium.launch(headless=True)
+    browser=pw.chromium.launch(headless=True, executable_path=os.getenv('CHROME_BIN') or None)
     for lang,touch in [('en',False),('de',True),('de',False),('en',True)]:play(browser,lang,touch)
     controls(browser);layouts(browser);browser.close()
 assert not errors,errors

@@ -3,7 +3,7 @@ import math, pathlib
 import os
 out=pathlib.Path(os.environ.get('EVIDENCE_DIR','evidence'));out.mkdir(exist_ok=True)
 with sync_playwright() as pw:
- b=pw.chromium.launch(headless=True)
+ b=pw.chromium.launch(headless=True, executable_path=os.getenv('CHROME_BIN') or None)
  for mobile in (False,True):
   p=b.new_page(viewport={'width':390 if mobile else 1363,'height':844 if mobile else 768},has_touch=mobile,is_mobile=mobile)
   p.goto(os.environ['BASELINE_URL']);p.locator('#fire-btn').click()

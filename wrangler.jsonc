@@ -1,0 +1,8 @@
+{
+  "name": "prallwerk-preview",
+  "main": "dist/server/index.js",
+  "compatibility_date": "2026-11-19",
+  "workers_dev": true,
+  "routes": [{"pattern": "prallwerk.smarbiz.sbs", "custom_domain": true}],
+  "build": {"command": "npm run build"}
+}

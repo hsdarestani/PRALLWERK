@@ -5,9 +5,16 @@
 - Two original handcrafted stages with tested winning routes.
 - Real deterministic orb collisions, visible delayed conductor circuits, mirrors and armor.
 - Three shields, advancing hazards, finite salves, victory/defeat/retry, score breakdown.
-- Responsive German interface, original vector art, accessible pointer/keyboard controls, pause.
+- Responsive German and English interface, original vector art and rendered chapter artwork, accessible pointer/keyboard controls, pause.
 - Local completed-stage progression, records, synthesized audio, mute, contrast/reduced-effects settings.
 - Cloudflare preview on the requested domain and source in the requested repository.
+
+## Bilingual arcade upgrade
+
+- Isolated prediction of up to two lead-orb collisions and an optional deterministic 3× volley speed.
+- German and English across active play, dialogs, settings, metadata and accessible labels.
+- Event-synchronized circuitry, original synthesized impact voices, mobile cancellation and per-stage mastery targets.
+- Browser workflow for both locales and input types with comparable screenshots and frame samples.
 
 ## Slice 2 — next priority, incomplete
 

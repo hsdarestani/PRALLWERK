@@ -1,48 +1,36 @@
 # PRALLWERK
 
-Original German-language arcade physics game. **Slice 1: playable proof**, not the full commercial product.
+A two-stage physics arcade game set in the Old Workshop. Drag to aim a five-orb volley. Hit conductors to send energy down connected cables and break the core before the machines breach the line.
 
-**Play:** https://prallwerk.smarbiz.sbs/  
-**Cloudflare fallback:** https://prallwerk-preview.hsdf7rb.workers.dev/
+[Deutsch](https://prallwerk.smarbiz.sbs/?lang=de) · [English](https://prallwerk.smarbiz.sbs/?lang=en)
 
-Two genuinely playable, handcrafted levels: **Erstes Leuchten** and **Über Bande**. Five-orb volleys, wall and mirror ricochets, delayed conductor chains, armor damage, finite wave limits, advancing hazards, shields, win/loss, score breakdown, restart, chapter selection, local unlocks/best scores, optional synthesized audio, pause, reduced effects and contrast controls.
+## Play
 
-No shop, payments, leaderboard, fake players, external art, analytics, or runtime AI. The page is explicitly marked as a non-indexed preview.
+Release the pointer to fire. With the keyboard, aim with Left/Right and fire with Space or Enter. Escape pauses. The fire button switches between normal and triple speed while a volley is in flight. The dotted guide simulates the lead orb through up to two collisions. The other four orbs follow at intervals and can encounter a changed board.
 
-## Run locally
+Clearing **First Light / Erstes Leuchten** unlocks **Bank Shot / Über Bande**. Earn a mastery seal by winning with 1,700 or 2,150 points respectively. Records, unlocked stages, audio, volume, effects, contrast and language persist in this browser. Refresh starts a new attempt. Switching languages keeps the current shot running. German is the initial language unless a supported query or saved preference selects English.
 
-Requires Node.js 24 or later. No package installation or external dependencies are needed.
+## Development
+
+Use Node 24 or newer. The shipping game has zero package dependencies.
 
 ```sh
 npm run dev
-# http://localhost:3000
 npm run check
 ```
 
-Drag anywhere in the arena to aim; release to launch. Desktop: Left/Right aim, Space/Enter fire, Escape pauses. The large fire button is an alternative to dragging. Completing Level 01 unlocks Level 02. Saves persist **completed levels, best scores and settings** in this browser; an interrupted volley restarts on refresh.
+The development server listens on port 3000. The test command builds the deployable Worker and runs the Node test suite. It uses Node's TypeScript syntax erasure. The browser workflow runs Chromium through Python Playwright and captures comparisons with the pinned baseline.
 
-## Architecture
+## Code and artwork
 
-- `src/engine.ts`: deterministic pure TypeScript simulation, fixed 120 Hz step; no DOM, random values or clocks. Rounded angle input logs support deterministic replay. This is not yet server-side score verification.
-- `src/levels.ts`: two versioned handcrafted level definitions, tiles and explicit circuit connections.
-- `src/app.ts`: original Canvas 2D renderer, pointer/keyboard controls, German UI, local save, Web Audio and settings.
-- `public/`: original UI, stylesheet and vector identity. The QA iframe is local-only and absent from the deployed Worker asset allowlist.
-- `scripts/build.mjs`: Node's built-in TypeScript erasure; produces static browser modules and a self-contained Cloudflare Worker at `dist/server/index.js`. This performs syntax transformation, not static TypeScript type checking.
-- `wrangler.jsonc`: reproducible Cloudflare deployment configuration. No runtime secrets or database bindings are required for this slice.
+- `src/engine.ts` handles deterministic 120 Hz physics, scoring and event emission. Level IDs, connection graphs and hit points live in `src/levels.ts`.
+- `src/trajectory.ts` simulates an isolated copy of a volley for aiming. `src/render.ts` draws the arena, cables, orbs and effects. `src/audio.ts` synthesizes audio on demand.
+- `src/app.ts` binds input, UI, dialogs and progression. `src/locale.ts` and `src/save.ts` own bilingual copy and compatible local saves.
+- `scripts/workshop-art.py` is the Blender source for the original workshop sculpture. The game ships its optimized WebP render. Canvas geometry, icons and sounds are original.
+- `scripts/build.mjs` bundles the static game and Worker. `wrangler.jsonc` identifies the preview. `GET /api/health` reports its release version and stage count.
 
-Canvas 2D replaces the suggested React/Phaser stack for this compact proof: it keeps simulation completely separate, removes framework startup/download overhead, and gives full control over the original vector art. The small Worker serves the six static assets with explicit content types, a restrictive CSP and noindex headers. Nothing is embedded from third-party gaming sites.
+## Verification and scope
 
-## Deploy
+[Browser workflow](.github/workflows/browser.yml) · [Original baseline QA](docs/QA.md) · [Milestone status](docs/ROADMAP.md) · [Product brief](docs/PRODUCT_BRIEF.md)
 
-```sh
-npm run check
-npx wrangler deploy
-```
-
-Use an already-authorized Cloudflare account with Workers access and the `smarbiz.sbs` zone for the configured custom domain. This does not set up recurring deployment or create paid resources. CI runs build/tests only; it does not contain deployment credentials.
-
-`GET /api/health` reports the preview version and truthful level count. Other API routes do not exist in this slice. In particular, checkout and leaderboard routes return 404 rather than simulated success.
-
-## Evidence and next steps
-
-See [QA results](docs/QA.md), [unfinished milestones](docs/ROADMAP.md), and the [supplied product brief](docs/PRODUCT_BRIEF.md). Native iPhone Safari/Android Chrome and midrange-device performance remain unverified. This is not a production-ready or commercially cleared release.
+The gameplay-evidence workflow artifact contains before/after screenshots, both languages and frame samples from the CI runner. Physical iPhone and Android performance and first-time player enjoyment still need external playtesting. The public preview provides two free stages with local records. Paid content and online challenges are later milestones.

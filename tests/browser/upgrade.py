@@ -2,6 +2,7 @@
 import json
 import math
 import os
+import re
 from pathlib import Path
 from playwright.sync_api import sync_playwright, expect
 
@@ -26,7 +27,7 @@ def profile(p):
     return p.evaluate("JSON.parse(localStorage.getItem('prallwerk.save.v1'))")
 
 def ready(p):
-    expect(p.locator('#phase')).to_have_text(__import__('re').compile('^(Ready|Schussbereit)$'), timeout=20000)
+    expect(p.locator('#phase')).to_have_text(re.compile('^(Ready|Schussbereit)$'), timeout=20000)
 
 def gesture(p, angle, touch, cancel=False):
     ready(p)
@@ -105,6 +106,10 @@ def play(browser,lang,touch):
 def controls(browser):
     p=browser.new_page(viewport={'width':1363,'height':768})
     p.on('pageerror',lambda err:errors.append(str(err)))
+    p.add_init_script("""window.qaVoices=0; const original=AudioContext.prototype.createOscillator;
+        AudioContext.prototype.createOscillator=function(...args){
+          window.qaVoices++;return original.apply(this,args)
+        };""")
     p.goto(BASE); expect(p.locator('html')).to_have_attribute('lang','de-DE')
     # Restore a real v1-shaped record, reload and inspect its user-visible continuity.
     p.evaluate("""localStorage.setItem('prallwerk.save.v1',JSON.stringify({version:1,best:{1:1700},completed:[1],unlocked:2,settings:{sound:false,motion:true,contrast:false}}))""")
@@ -117,6 +122,7 @@ def controls(browser):
     p.locator('#modal .actions [data-act=close]').click()
     assert profile(p)['settings']==dict(sound=True,motion=False,contrast=True,volume=.01,language='en')
     assert p.locator('body').evaluate("e=>e.classList.contains('still')&&e.classList.contains('high')")
+    p.wait_for_function('window.qaVoices>0')
     p.locator('#audio').click();assert not profile(p)['settings']['sound']
     p.locator('[data-act=help]:visible').first.click();expect(p.get_by_text('Read the shot')).to_be_visible()
     p.keyboard.press('Escape');p.locator('[data-act=privacy]').click()

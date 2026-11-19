@@ -13,3 +13,9 @@ dialog{padding:0;max-height:90svh;width:min(460px,calc(100% - 24px));border:1px 
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}}
 .bar .icon,.lang button,.dialog-head .icon{min-width:44px;min-height:44px}
 @media(max-width:360px){.bar{padding-inline:8px}.brand{font-size:20px}.utilities{gap:3px}}
+.hero-art:before{inset-inline:0}
+@media(max-height:530px) and (orientation:landscape){
+  .cabinet{position:relative}
+  .game-title{display:block;position:absolute;left:calc(100% + 6px);top:0}
+  .game-title>div{display:none}
+}

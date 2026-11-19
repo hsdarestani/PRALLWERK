@@ -16,7 +16,8 @@ def capture(p, name):
     p.screenshot(path=OUT / (name + '.jpg'), quality=87)
 
 def no_overflow(p):
-    assert p.evaluate('document.documentElement.scrollWidth <= innerWidth + 1')
+    overflow=p.evaluate("""() => [...document.querySelectorAll('body *')].filter(e=>e.getBoundingClientRect().right>innerWidth+1).slice(0,8).map(e=>[e.tagName,e.className,Math.ceil(e.getBoundingClientRect().right)])""")
+    assert p.evaluate('document.documentElement.scrollWidth <= innerWidth + 1'),(p.viewport_size,overflow)
 
 def switch(p, lang, dialog=False):
     scope = p.locator('#modal' if dialog else 'header')
@@ -75,12 +76,12 @@ def play(browser,lang,touch):
         function collect(now){if(previous)qaFrames.push(now-previous);previous=now;
         if(qaFrames.length<80)requestAnimationFrame(collect)}requestAnimationFrame(collect); }""")
     gesture(p,0,touch)
+    expect(p.locator('#callout')).to_be_visible(timeout=5000)
+    capture(p,'after-'+mode+'-chain-'+lang)
     remaining=p.locator('#shots').inner_text()
     switch(p,alt)
     assert p.locator('#shots').inner_text()==remaining
     switch(p,lang)
-    expect(p.locator('#callout')).to_be_visible(timeout=5000)
-    capture(p,'after-'+mode+'-chain-'+lang)
     ready(p)
     gesture(p,0,touch); faster(p)
     next_stage=p.locator('#modal [data-act=next]')
@@ -88,6 +89,7 @@ def play(browser,lang,touch):
     assert profile(p)['best']['1']==1700
     switch(p,alt,True);assert p.locator('.result-total').inner_text()==('1,700' if alt=='en' else '1.700')
     switch(p,lang,True);next_stage.click()
+    capture(p,'after-'+mode+'-stage2-'+lang)
     for _ in range(3):
         gesture(p,.9,touch);faster(p)
     expect(p.locator('#modal .result-total')).to_be_visible(timeout=20000)
@@ -149,6 +151,8 @@ def layouts(browser):
         p=browser.new_page(viewport={'width':w,'height':h})
         p.goto(BASE+'/?lang=de');no_overflow(p);p.locator('#start').click();no_overflow(p)
         assert p.locator('#game').bounding_box()['width']>130
+        button=p.locator('#fire-btn').bounding_box()
+        assert button['y']+button['height']<=h+1,(w,h,button)
         p.locator('#pause').click();no_overflow(p)
         r=p.locator('dialog').bounding_box();assert r['x']>=0 and r['x']+r['width']<=w+1
         p.close()

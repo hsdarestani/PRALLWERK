@@ -1,9 +1,10 @@
-import {createState,fire,step,drainEvents,DT} from './engine.ts';
+import {createState,fire,step,drainEvents,lockRemaining,DT} from './engine.ts';
 import type {GameEvent} from './engine.ts';
+import {CHAPTERS,PER_CHAPTER,chapterIndex,stageMotif} from './campaign.ts';
 import {LEVELS} from './levels.ts';
 import {message,number,nodeCount} from './locale.ts';
 import type {Key,Language} from './locale.ts';
-import {SAVE_KEY,masteryTarget,readProfile} from './save.ts';
+import {SAVE_KEY,masteryTarget,readProfile,recordClear} from './save.ts';
 import {icon} from './icons.ts';
 import {makeRenderer} from './render.ts';
 import {AudioBus} from './audio.ts';
@@ -20,7 +21,10 @@ const synth=new AudioBus();
 const renderer=makeRenderer(canvas);
 const fmt=(n:number)=>number(profile.settings.language,n);
 const t=(key:Key,vars:Record<string,string|number>={})=>message(profile.settings.language,key,vars);
-const stageName=(id:number)=>t(id===1?'s1':'s2');
+const localized=(pair:readonly [string,string])=>pair[profile.settings.language==='en'?1:0];
+const stageName=(id:number)=>id<=2?t(id===1?'s1':'s2'):localized(stageMotif(id));
+const digits=(id:number)=>String(id).padStart(2,'0');
+let selectedChapter=chapterIndex(profile.unlocked);
 const stageNumber=(id:number)=>t('stage',{n:String(id).padStart(2,'0')});
 const settings=profile.settings;
 const notify=(text:string)=>{el('live').textContent=text;};
@@ -53,11 +57,13 @@ function localize(){
   el('brand').setAttribute('aria-label',t('home')+' · PRALLWERK');
   el('save-status').textContent=t(canSave?'local':'noSave');
   el('start').querySelector('span')!.textContent=t(profile.completed.length?'resumeCampaign':'start');
-  el('progress').textContent=t('progress')+' · '+profile.completed.length+' / 2';
+  el('progress').textContent=t('progress')+' · '+profile.completed.length+' / '+LEVELS.length;
+  el('chapter-picker').innerHTML=chapterPicker();
   el('stage-cards').innerHTML=cards();
   el('stage-code').textContent=stageNumber(s.level.id);
   el('board-name').textContent=stageName(s.level.id);el('stage-name').textContent=stageName(s.level.id);
-  el('stage-tip').textContent=t(s.level.id===1?'tip1':'tip2');
+  el('chapter-name').textContent=localized(CHAPTERS[chapterIndex(s.level.id)].name);
+  el('stage-tip').textContent=s.level.id<=2?t(s.level.id===1?'tip1':'tip2'):localized(CHAPTERS[chapterIndex(s.level.id)].tip);
   el('target').textContent=t('targetRule',{n:fmt(masteryTarget(s.level.id))});
   el('best').textContent=profile.best[s.level.id]?fmt(profile.best[s.level.id]):t('first');
   el('audio').innerHTML=icon(settings.sound?'sound':'mute');label(el('audio'),settings.sound?'mute':'unmute');
@@ -78,15 +84,27 @@ function applySettings(){
   renderer.settings(settings.motion,settings.contrast,qualityLow);
 }
 function schematic(id:number){
-  const first=id===1;
-  const art=first?'<path d="M8 28h17V16h31v12h16" stroke="#70cabc"/><path d="m12 21 5 7-5 7-5-7zM68 21l5 7-5 7-5-7z" fill="#375961" stroke="#aed3db"/><rect x="33" y="8" width="15" height="15" rx="2" fill="#2b6258" stroke="#a2eccd"/><path d="m42 10-6 7h4l-1 5 6-9h-4z" fill="#a2eccd" stroke="none"/>':'<path d="m6 35 17-19 18 14 22-20" stroke="#8ba19c" stroke-dasharray="2 3"/><path d="m14 23 13-13m24 24 13-13" stroke="#b8acf2" stroke-width="4"/><path d="m39 7 6 7-6 7-6-7z" fill="#c68f55" stroke="#ffd8a2"/>';
+  const palette={core:'#ffbf75',conductor:'#99e7cb',armor:'#c2c8cd',mirror:'#bdadf5',crystal:'#8ac8e3'};
+  const art=LEVELS[id-1].tiles.map(tile=>{
+    const x=5+tile.x/5.5,y=2+(tile.y-64)/7,c=palette[tile.kind];
+    if(tile.kind==='mirror')return '<path d="M'+x+' '+(y+(tile.flip?0:5))+'l5 '+(tile.flip?5:-5)+'" stroke="'+c+'" stroke-width="2"/>';
+    if(tile.kind==='core'||tile.kind==='crystal')return '<path d="M'+x+' '+y+'l3 3-3 3-3-3z" fill="'+c+'"/>';
+    return '<rect x="'+x+'" y="'+y+'" width="5" height="5" fill="'+c+'"/>';
+  }).join('');
   return '<span class="map-symbol"><svg viewBox="0 0 80 42" aria-hidden="true">'+art+'</svg></span>';
 }
+function chapterPicker(){
+  const options=CHAPTERS.map((chapter,i)=>{
+    const range=(i*PER_CHAPTER+1)+'–'+((i+1)*PER_CHAPTER);
+    return '<option value="'+i+'" '+(i===selectedChapter?'selected':'')+'>'+digits(i+1)+' · '+localized(chapter.name)+' ('+range+')</option>';
+  }).join('');
+  return '<label class="chapter-select"><span>'+t('chooseChapter')+'</span><select data-chapters>'+options+'</select></label>';
+}
 function cards(){
-  return LEVELS.map(level=>{
+  return LEVELS.slice(selectedChapter*PER_CHAPTER,(selectedChapter+1)*PER_CHAPTER).map(level=>{
     const id=level.id,locked=id>profile.unlocked,done=profile.completed.includes(id);
     const best=profile.best[id]||0,mastered=done&&best>=masteryTarget(id);
-    const subtitle=done?t('personal')+' · '+fmt(best):t(locked?'locked':'unlocked');
+    const subtitle=done?t('personal')+' · '+fmt(best):t(locked?'locked':'unlocked',{n:digits(id-1)});
     return '<button class="stage-card" data-act="level" data-stage="'+id+'" '+(locked?'disabled':'')+'>'+schematic(id)+'<span><span class="stage-no">'+stageNumber(id)+'</span><strong>'+stageName(id)+'</strong><small>'+subtitle+'</small></span><i>'+icon(locked?'lock':mastered?'medal':done?'check':'play')+'</i></button>';
   }).join('');
 }
@@ -100,12 +118,16 @@ function phase():Key{
 }
 function updateHud(){
   const core=s.tiles.find(tile=>tile.kind==='core')!;
-  const key=[s.hearts,s.volley,s.score,s.status,core.hp,s.returned,fast,phase(),hintKey].join('|');
+  const left=lockRemaining(s);
+  const key=[left,s.hearts,s.volley,s.score,s.status,core.hp,s.returned,fast,phase(),hintKey].join('|');
   if(previousHud===key)return;
   previousHud=key;
   el('score').textContent=fmt(s.score);el('shots').textContent=String(s.level.maxVolleys-s.volley)+' / '+s.level.maxVolleys;
   el('shields').innerHTML=[0,1,2].map(i=>'<i class="'+(i>=s.hearts?'spent':'')+'">'+icon('shield')+'</i>').join('');
   el('shields').setAttribute('aria-label',t('shields')+' '+Math.max(0,s.hearts));
+  const shield=el('lock-status');
+  shield.hidden=left===0;
+  if(left&&s.level.lock)shield.textContent=t(({armor:'armorLock',conductor:'conductorLock',crystal:'crystalLock'} as const)[s.level.lock.kind],{n:left});
   el('core').textContent=core.hp+' / '+core.maxHp;(el('core-meter') as HTMLProgressElement).value=core.hp/core.maxHp;
   el('phase').textContent=t(phase());el('orb-status').textContent=s.status==='flying'?t('balls')+' '+(5-s.returned)+'/5':t('balls')+' ×5';
   const flying=s.status==='flying',ended=s.status==='lost'||s.status==='won';
@@ -123,7 +145,8 @@ function cancelPointer(){
   if(id!==null&&canvas.hasPointerCapture(id))canvas.releasePointerCapture(id);
 }
 function startLevel(id:number){
-  if(id<1||id>profile.unlocked)return;
+  if(!Number.isInteger(id)||id<1||id>profile.unlocked||id>LEVELS.length)return;
+  selectedChapter=chapterIndex(id);
   closeDialog();cancelPointer();s=createState(LEVELS[id-1]);
   playing=true;angle=0;fast=false;resultTimer=0;accum=0;feedback=null;hintKey=null;
   renderer.reset();el('home-screen').hidden=true;el('game-screen').hidden=false;
@@ -132,7 +155,7 @@ function startLevel(id:number){
   notify(stageNumber(id)+'. '+t('goal'));
 }
 function home(){
-  closeDialog();cancelPointer();playing=false;resultTimer=0;feedback=null;
+  closeDialog();cancelPointer();playing=false;resultTimer=0;feedback=null;selectedChapter=chapterIndex(profile.unlocked);
   document.body.classList.remove('game-active');el('game-screen').hidden=true;el('home-screen').hidden=false;localize();
   el('start').focus({preventScroll:true});window.scrollTo(0,0);
 }
@@ -152,13 +175,13 @@ function row(key:Key,value:string){
 }
 function drawDialog(){
   const view=dialogView;
-  const titles:Record<string,Key>={pause:'paused',help:'guide',privacy:'privacy',settings:'settings',stages:'stages',exit:'exitAsk',restart:'restartAsk',change:'exitAsk',result:s.status==='won'?(s.level.id===1?'clear1':'clear2'):'defeat'};
+  const titles:Record<string,Key>={pause:'paused',help:'guide',privacy:'privacy',settings:'settings',stages:'stages',exit:'exitAsk',restart:'restartAsk',change:'exitAsk',result:s.status==='won'?(s.level.id===LEVELS.length?'campaignEnd':s.level.id===1?'clear1':'clear2'):'defeat'};
   let content='',actions='';
   switch(view){
     case 'pause':
       actions=button('close','resume',true)+button('restart','restart')+button('stages','stages')+button('home','menu');break;
     case 'stages':
-      content='<div class="modal-cards">'+cards()+'</div>';break;
+      content=chapterPicker()+'<div class="modal-cards">'+cards()+'</div>';break;
     case 'settings':
       content='<div class="settings-row"><span>'+t('language')+'</span>'+languageButtons()+'</div>';
       for(const [name,key] of [['sound','audio'],['motion','motion'],['contrast','contrast']] as const){
@@ -170,7 +193,7 @@ function drawDialog(){
       for(const [symbol,heading,desc] of [['target','helpAim','howAim'],['charge','helpChain','howChain'],['mirror','helpMirror','howMirror'],['shield','helpRisk','howRisk']] as const){
         content+='<div class="help-row"><i>'+icon(symbol)+'</i><div><strong>'+t(heading)+'</strong><p>'+t(desc)+'</p></div></div>';
       }
-      content+='<p class="dialog-copy">'+t('keyboard')+'</p>';actions=button('close','back',true);break;
+      content+='<p class="dialog-copy">'+t('keyboard')+'</p><p class="dialog-copy">'+t('shieldRule')+'</p>';actions=button('close','back',true);break;
     case 'privacy':content='<p class="dialog-copy">'+t('privacyBody')+'</p>';actions=button('close','back',true);break;
     case 'exit':case 'restart':case 'change':
       content='<p class="dialog-copy">'+t('abandonText')+'</p>';actions=button('confirm',view==='restart'?'restart':view==='change'?'play':'home',true)+button('cancel','back');break;
@@ -180,9 +203,9 @@ function drawDialog(){
       if(won&&s.score>=masteryTarget(s.level.id))content+='<div class="award">'+icon('medal')+t('earned')+'</div>';
       if(newBest&&won)content+='<p class="notice">'+t('newBest')+'</p>';
       content+=row('baseScore',fmt(s.destroyScore))+row('chainScore',fmt(s.chainScore))+row('spare',fmt(s.bonus))+row('bestChain',nodeCount(settings.language,s.bestChain));
-      if(newUnlock&&won)content+='<p class="notice">'+t('nextUnlock')+'</p>';
+      if(newUnlock&&won)content+='<p class="notice">'+t('nextUnlock',{n:digits(s.level.id+1)})+'</p>';
       if(!won)content+='<p class="dialog-copy">'+t(s.hearts<=0?'broke':'out')+'</p>';
-      actions=(won&&s.level.id===1?button('next','next',true):'')+button('again',won?'replay':'retry',!won||s.level.id===2)+button('stages','stages');break;
+      actions=(won&&s.level.id<LEVELS.length?button('next','next',true):'')+button('again',won?'replay':'retry',!won||s.level.id===LEVELS.length)+button('stages','stages');break;
     }
   }
   el('modal-body').innerHTML='<div class="dialog-head"><h2 id="dialog-title">'+t(titles[view])+'</h2>'+(view==='settings'?'':languageButtons())+'<button class="icon" data-act="close" aria-label="'+t('close')+'">'+icon('close')+'</button></div>'+content+(actions?'<div class="actions">'+actions+'</div>':'');
@@ -195,7 +218,7 @@ function action(name:string,id=0){
     case 'level':
       if(activeRun()){pendingStage=id;returnView='stages';show('change');}else startLevel(id);break;
     case 'again':startLevel(s.level.id);break;
-    case 'next':startLevel(2);break;
+    case 'next':startLevel(s.level.id+1);break;
     case 'fire':
       if(s.status==='ready')launch();else if(s.status==='flying'){fast=!fast;updateHud();}else show('result');break;
     case 'home':
@@ -212,6 +235,15 @@ function action(name:string,id=0){
     case 'close':closeDialog();break;
   }
 }
+document.addEventListener('change',event=>{
+  const select=event.target;
+  if(!(select instanceof HTMLSelectElement)||!select.hasAttribute('data-chapters'))return;
+  selectedChapter=Number(select.value);
+  document.querySelectorAll<HTMLSelectElement>('[data-chapters]').forEach(other=>other.value=select.value);
+  el('stage-cards').innerHTML=cards();
+  const grid=modal.querySelector('.modal-cards');
+  if(grid)grid.innerHTML=cards();
+});
 document.addEventListener('click',event=>{
   const target=(event.target as HTMLElement).closest<HTMLButtonElement>('button');
   if(!target||target.disabled)return;
@@ -272,9 +304,8 @@ function resolveRun(){
   newBest=false;newUnlock=false;
   if(s.status==='won'){
     const id=s.level.id;newBest=s.score>(profile.best[id]||0);
-    newUnlock=id===1&&profile.unlocked===1;
-    if(!profile.completed.includes(id))profile.completed.push(id);
-    profile.unlocked=2;profile.best[id]=Math.max(profile.best[id]||0,s.score);
+    newUnlock=id===profile.unlocked&&id<LEVELS.length;
+    recordClear(profile,id,s.score);
     writeSave();localize();
   }
   resultTimer=settings.motion?.58:.12;fast=false;
@@ -288,6 +319,7 @@ function consume(event:GameEvent,now:number){
     case 'pulse':synth.play('pulse',++pulseIndex);break;
     case 'hit':synth.play(event.kind||'crystal');break;
     case 'destroy':synth.play(event.kind==='armor'?'fracture':'destroy');break;
+    case 'guard':synth.play('armor');break;
     case 'breach':feedback='breach';toastUntil=now+800;updateToast();synth.play('breach');break;
     case 'won':case 'lost':synth.play(event.type);resolveRun();break;
     default:synth.play(event.type);

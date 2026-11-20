@@ -1,6 +1,6 @@
 # PRALLWERK
 
-A two-stage physics arcade game set in the Old Workshop. Drag to aim a five-orb volley. Hit conductors to send energy down connected cables and break the core before the machines breach the line.
+A 180-stage, twelve-chapter physics arcade campaign starting in the Old Workshop. Drag to aim a five-orb volley. Hit conductors to send energy down connected cables and break the core before the machines breach the line.
 
 [Deutsch](https://prallwerk.smarbiz.sbs/?lang=de) · [English](https://prallwerk.smarbiz.sbs/?lang=en)
 
@@ -8,7 +8,7 @@ A two-stage physics arcade game set in the Old Workshop. Drag to aim a five-orb 
 
 Release the pointer to fire. With the keyboard, aim with Left/Right and fire with Space or Enter. Escape pauses. The fire button switches between normal and triple speed while a volley is in flight. The dotted guide simulates the lead orb through up to two collisions. The other four orbs follow at intervals and can encounter a changed board.
 
-Clearing **First Light / Erstes Leuchten** unlocks **Bank Shot / Über Bande**. Earn a mastery seal by winning with 1,700 or 2,150 points respectively. Records, unlocked stages, audio, volume, effects, contrast and language persist in this browser. Refresh starts a new attempt. Switching languages keeps the current shot running. German is the initial language unless a supported query or saved preference selects English.
+Each victory unlocks the next stage. The chapter selector previews fifteen boards at a time. Shielded cores require clearing the specified number of conductors, armor plates or crystals. Each board has an attainable mastery target. Records, unlocked stages, audio, volume, effects, contrast and language persist in this browser. Refresh starts a new attempt. Switching languages keeps the current shot running. German is the initial language unless a supported query or saved preference selects English.
 
 ## Development
 
@@ -33,4 +33,8 @@ The development server listens on port 3000. The test command builds the deploya
 
 [Browser workflow](.github/workflows/browser.yml) · [Original baseline QA](docs/QA.md) · [Milestone status](docs/ROADMAP.md) · [Product brief](docs/PRODUCT_BRIEF.md)
 
-The gameplay-evidence workflow artifact contains before/after screenshots, both languages and frame samples from the CI runner. Physical iPhone and Android performance and first-time player enjoyment still need external playtesting. The public preview provides two free stages with local records. Paid content and online challenges are later milestones.
+The gameplay-evidence workflow artifact contains before/after screenshots, both languages and frame samples from the CI runner. Physical iPhone and Android performance and first-time player enjoyment still need external playtesting. The public preview provides 180 free stages with local records. Paid content and online challenges are later milestones.
+
+## Campaign content
+
+The two original boards keep their layouts and scores. Stages 3–180 combine fifteen authored formations with twelve chapter rules and a fixed per-stage arrangement of parts and circuitry. Each stage has a reproducible keyboard solution in `tests/campaign-routes.json`. Regenerate routes and mastery targets with `node scripts/solve-campaign.mjs`. The test suite replays all 180 wins, rejects duplicate physical layouts, and checks all 179 unlock transitions and the finale.

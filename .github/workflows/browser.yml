@@ -1,7 +1,7 @@
 name: Arcade browser acceptance
 on:
   push:
-    branches: [feature/bilingual-arcade]
+    branches: [feature/bilingual-arcade, feature/campaign-180]
   workflow_dispatch:
 jobs:
   play:
@@ -40,6 +40,7 @@ jobs:
           node scripts/dev.mjs --port 4175 > /tmp/prallwerk.log 2>&1 &
           for i in {1..15}; do curl -fsS http://127.0.0.1:4175 > /dev/null && break; sleep 1; done
           python tests/browser/upgrade.py
+          python tests/browser/campaign.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:

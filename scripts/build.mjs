@@ -1,7 +1,7 @@
 import {readFile,writeFile,mkdir,cp} from 'node:fs/promises';
 import {stripTypeScriptTypes} from 'node:module';
 await mkdir('dist/server',{recursive:true});
-const modules=['engine','levels','locale','save','trajectory','audio','icons','render','app'];
+const modules=['engine','campaign','medals','levels','locale','save','trajectory','audio','icons','render','app'];
 for(const name of modules){
   const source=await readFile('src/'+name+'.ts','utf8');
   const js=stripTypeScriptTypes(source,{mode:'strip'}).replaceAll(/from '(\.\/[^']+)\.ts'/g,"from '$1.js'");
@@ -20,4 +20,4 @@ const labels=Object.fromEntries(['de','en'].map(lang=>{
 }));
 const template=await readFile('scripts/worker-template.mjs','utf8');
 await writeFile('dist/server/index.js','const assets='+JSON.stringify(assets)+';\nconst labels='+JSON.stringify(labels)+';\n'+template);
-console.log('Built PRALLWERK 0.2.0 with '+Object.keys(assets).length+' assets.');
+console.log('Built PRALLWERK 0.3.0 with '+Object.keys(assets).length+' assets.');

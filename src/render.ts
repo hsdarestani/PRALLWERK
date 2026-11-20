@@ -189,7 +189,12 @@ function draw(s:State,angle:number,held:boolean,now:number,dt:number){
   ctx.setLineDash([2,6]);line(23,448,397,448,'#d0967777');ctx.setLineDash([]);
   for(const x of [27,393]){line(x,444,x,452,'#dd9a78',2);}
   if(s.status==='ready')sight(s,angle,held);
-  for(const t of s.tiles)drawTile(t,motion?now:0);
+  // Fixtures stay on the back rail as the target rack descends in front of them.
+  // The core remains identifiable when its rack crosses a fixed valve or pivot.
+  const paintTime=motion?now:0;
+  for(const t of s.tiles)if(t.kind==='rotor'||t.kind==='gate'||t.kind==='mirror')drawTile(t,paintTime);
+  for(const t of s.tiles)if(t.kind!=='rotor'&&t.kind!=='gate'&&t.kind!=='mirror'&&t.kind!=='core')drawTile(t,paintTime);
+  drawTile(s.tiles.find(t=>t.kind==='core')!,paintTime);
   for(const f of s.fuses){
     const tile=s.tiles.find(t=>t.id===f.id)!,fraction=1-(f.at-s.tick)/42;
     const radius=s.level.special==='garden'?119:86;

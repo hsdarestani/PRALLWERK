@@ -1,5 +1,7 @@
 const paths:Record<string,string>={
   brand:'<path fill="currentColor" stroke="none" d="M1 19 9 3h5L6 19zm9 0 8-16h5l-8 16z"/><path d="M3 22h12"/>',
+  ricochet:'<path d="M3 5v14m17-1L6 12l13-7m-6 0h6l-2 6"/>',
+  pierce:'<path d="M12 2v18m-5-6 5 6 5-6M3 9h5m8 0h5"/>',
   play:'<path d="m8 4 11 8-11 8z" fill="currentColor" stroke="none"/>',
   grid:'<path d="m3 7 9-5 9 5-9 5zM3 12l9 5 9-5M3 17l9 5 9-5"/>',
   settings:'<path d="M3 6h7m5 0h6M3 12h11m5 0h2M3 18h3m5 0h10"/><circle cx="12" cy="6" r="2"/><circle cx="16" cy="12" r="2"/><circle cx="8" cy="18" r="2"/>',

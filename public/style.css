@@ -39,3 +39,5 @@ dialog{padding:0;max-height:90svh;width:min(460px,calc(100% - 24px));border:1px 
 
 .brief,.game-title>div{min-width:0}.brief-body{container-type:inline-size}.brief h1,.stage-card strong,.game-title h2{overflow-wrap:anywhere;hyphens:auto}
 .brief h1.long-title{font-size:clamp(23px,13cqi,44px)}.brief h1.compound-title{font-size:clamp(19px,9cqi,32px)}
+
+.rune i svg{width:1.7rem;height:1.7rem}

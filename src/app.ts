@@ -202,7 +202,7 @@ function drawDialog(){
   let content='',actions='';
   switch(view){
     case 'runes':
-      content='<p class="kicker">'+t('runeTime')+'</p><div class="rune-list">'+RUNES.map((r,i)=>'<button class="rune" data-rune="'+r+'"><i aria-hidden="true">'+['ϟ','↗','⤓'][i]+'</i><span><strong>'+t(r)+'</strong><small>'+t(runeDescription(r))+'</small></span></button>').join('')+'</div>';break;
+      content='<p class="kicker">'+t('runeTime')+'</p><div class="rune-list">'+RUNES.map(r=>'<button class="rune" data-rune="'+r+'"><i aria-hidden="true">'+icon(({surge:'charge',bank:'ricochet',pierce:'pierce'} as const)[r])+'</i><span><strong>'+t(r)+'</strong><small>'+t(runeDescription(r))+'</small></span></button>').join('')+'</div>';break;
     case 'pause':
       actions=button('close','resume',true)+button('restart','restart')+button('stages','stages')+button('home','menu');break;
     case 'stages':

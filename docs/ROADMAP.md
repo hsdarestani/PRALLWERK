@@ -1,8 +1,8 @@
 # Milestone status
 
-## Campaign expansion · version 0.3
+## Campaign adventure · version 0.4
 
-The free campaign now contains 180 distinct, sequentially unlocked boards in 12 chapters. A chapter selector, real machine-type core shields, and per-stage replay targets are live features of this build. Runes, permanent upgrades, a dedicated multi-phase boss and commercial modes are separate outstanding milestones.
+Twelve chapters contain six stages each. The campaign adds three physical fixtures, four two-phase cores, eight special puzzle finales and in-run rune choices. A separate v2 profile migrates legacy access and archives previous records. See [the release guide](ADVENTURE.md).
 
 ## Slice 1 — delivered playable proof
 
@@ -22,12 +22,9 @@ The free campaign now contains 180 distinct, sequentially unlocked boards in 12 
 
 ## Slice 2 — next priority, incomplete
 
-1. The original eight-stage content target has been superseded by the requested 180-stage campaign. Tune chapter pacing with external playtesters.
-2. Add an actual telegraphed multi-phase mini-boss. Current energy cores are regular targets, not bosses.
-3. Implement the three rune choices every two volleys and their real effects. There is no rune system yet.
-4. Develop non-monetized upgrade paths and chapter-level upgrade choices beyond sequential stage unlocks.
-5. Conduct physical iPhone Safari and Android Chrome QA, landscape/safe-area/accessibility testing and a measured midrange-device performance pass.
-6. Tune difficulty, trajectory readability, audio mix, mobile text sizes and repeat play from tester observations.
+1. Tune chapter pace and rune balance with first-time players across multiple sessions.
+2. Develop permanent non-commercial upgrades beyond local stage unlocks and mastery seals.
+3. Complete physical iPhone Safari and midrange Android performance, safe-area and accessibility testing.
 
 ## Slice 3 — paid product, not started
 

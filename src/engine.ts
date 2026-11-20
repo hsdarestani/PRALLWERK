@@ -2,7 +2,7 @@
 export const WIDTH=420, HEIGHT=560, DT=1/120, SPEED=570, MAX_VOLLEY_TICKS=1680;
 export type Kind='crystal'|'conductor'|'mirror'|'armor'|'core';
 export interface Tile {id:string;kind:Kind;x:number;y:number;w:number;h:number;hp:number;maxHp:number;links:string[];flip:boolean;flash:number}
-export interface Level {id:number;maxVolleys:number;orbCount:number;tiles:Tile[]}
+export interface Level {id:number;maxVolleys:number;orbCount:number;lock?:{kind:"armor"|"conductor"|"crystal";count:number};tiles:Tile[]}
 export interface Ball {x:number;y:number;vx:number;vy:number;delay:number;alive:boolean;last:string;cooldown:number;trail:{x:number;y:number}[]}
 export interface GameEvent {type:string;x:number;y:number;toX?:number;toY?:number;value?:number;kind?:Kind}
 export interface State {level:Level;tiles:Tile[];balls:Ball[];status:'ready'|'flying'|'won'|'lost';tick:number;volleyTick:number;volley:number;hearts:number;score:number;destroyScore:number;chainScore:number;bonus:number;chains:number;bestChain:number;hits:number;returned:number;triggered:string[];pulses:{at:number;from:string;to:string}[];events:GameEvent[];inputLog:number[];capped:boolean}
@@ -27,8 +27,15 @@ function circuit(s:State,start:Tile) {
   for(const id of visited)s.triggered.push(id);
   const count=visited.size-1;if(count){s.chains++;s.bestChain=Math.max(s.bestChain,count);const points=count*40;s.score+=points;s.chainScore+=points;emit(s,'chain',start,count);}
 }
+export function lockRemaining(s:State):number {
+  const lock=s.level.lock;
+  if(!lock)return 0;
+  const cleared=s.tiles.filter(t=>t.kind===lock.kind&&t.hp===0).length;
+  return Math.max(0,lock.count-cleared);
+}
 function damage(s:State,t:Tile,power=1,pulse=false) {
   if(t.hp<=0||t.kind==='mirror')return;
+  if(t.kind==='core'&&lockRemaining(s)>0){emit(s,'guard',t);return;}
   if(t.kind==='conductor'&&!pulse)circuit(s,t);
   t.hp=Math.max(0,t.hp-power);t.flash=12;s.hits++;emit(s,'hit',t,power);
   if(t.hp===0){const points=t.kind==='core'?500:t.kind==='armor'?150:100;s.score+=points;s.destroyScore+=points;emit(s,'destroy',t,points);}

@@ -29,3 +29,7 @@ dialog{padding:0;max-height:90svh;width:min(460px,calc(100% - 24px));border:1px 
 
 .hero-copy{min-width:0}.hero-art{overflow:clip}.game-active footer{display:none}
 @media(min-width:621px) and (min-height:531px){.game-active .bar{min-height:54px}}
+.chapter-select{display:flex;align-items:center;gap:12px;margin:12px 0 15px;color:var(--sub);font:12px var(--mono)}
+.chapter-select select{min-height:44px;max-width:100%;border:1px solid #45635b;border-radius:5px;background:#172928;color:var(--ink);padding:6px 10px;font:600 14px var(--body)}
+.lock-status{position:absolute;top:32px;inset-inline:0;text-align:center;color:#e2c7ff;font:600 10px var(--mono);pointer-events:none}
+@media(max-width:480px){.chapter-select{align-items:stretch;flex-direction:column;gap:5px}.chapter-select select{width:100%}.lock-status{font-size:9px;top:28px}}

@@ -1,3 +1,5 @@
+import {CHAPTERS,chapterIndex} from './campaign.ts';
+import {lockRemaining} from './engine.ts';
 import type {Tile,State,GameEvent} from './engine.ts';
 import {predict} from './trajectory.ts';
 import type {Point,Prediction} from './trajectory.ts';
@@ -48,6 +50,7 @@ function background(id:number){
   const grad=p.createRadialGradient(208,152,15,210,250,390);
   grad.addColorStop(0,id===1?'#213636':'#2b3142');grad.addColorStop(.58,'#132429');grad.addColorStop(1,'#0a1319');
   p.fillStyle=grad;p.fillRect(0,0,420,560);
+  p.fillStyle=CHAPTERS[chapterIndex(id)].color+'16';p.fillRect(0,0,420,560);
   for(let y=17;y<550;y+=26)for(let x=16;x<412;x+=26){
     p.fillStyle=contrast?'#74938e':'#78968b44';p.fillRect(x,y,1.4,1.4);
     if((x+y)%52===33){p.fillStyle='#718e8621';p.fillRect(x-2,y,5,1);p.fillRect(x,y-2,1,5);}
@@ -125,7 +128,7 @@ function launcher(s:State,angle:number,held:boolean){
 function addEvent(e:GameEvent){
   const color=e.kind==='core'?C.amber:e.kind==='mirror'?C.blue:e.kind==='crystal'?'#9dd9f0':e.kind==='armor'?C.coral:C.aqua;
   const large=e.type==='destroy'||e.type==='won';
-  if(!['wall','mirror','destroy','hit','pulse','won','breach','fire'].includes(e.type))return;
+  if(!['wall','guard','mirror','destroy','hit','pulse','won','breach','fire'].includes(e.type))return;
   const x=e.type==='pulse'?e.toX!:e.x,y=e.type==='pulse'?e.toY!:e.y;
   const base={x,y,color,age:0,vx:0,vy:0};
   bursts.push({...base,kind:'ring',life:large?.60:.26,size:large?42:14});
@@ -159,6 +162,7 @@ function draw(s:State,angle:number,held:boolean,now:number,dt:number){
   for(const x of [27,393]){line(x,444,x,452,'#dd9a78',2);}
   if(s.status==='ready')sight(s,angle,held);
   for(const t of s.tiles)drawTile(t,motion?now:0);
+  if(lockRemaining(s)){const core=s.tiles.find(t=>t.kind==='core')!;ctx.setLineDash([4,3]);circle(core.x+22,core.y+22,31,undefined,'#ddbdff',2.5);ctx.setLineDash([]);}
   launcher(s,angle,held);
   for(const b of s.balls){if(!b.alive||b.delay>0)continue;
     const trail=motion?b.trail.slice(low?-4:-8):[];

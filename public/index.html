@@ -9,23 +9,23 @@
 <main>
 <section id="home-screen" class="home-screen">
 <div class="hero">
-  <div class="hero-copy"><p class="eyebrow"><b></b><span data-t="chapter"></span><em>/</em><span data-t="chapterTag"></span></p>
+  <div class="hero-copy"><p class="eyebrow"><b></b><span data-t="chapter"></span><em>/</em><span data-t="free"></span></p>
   <h1><span data-t="hero1"></span><br><strong data-t="hero2"></strong></h1>
   <p class="intro" data-t="premise"></p>
   <div class="hero-actions"><button id="start" data-act="start" class="primary"><i data-icon="play"></i><span></span></button><button data-act="help" class="quiet"><i data-icon="help"></i><span data-t="guide"></span></button></div></div>
   <div class="hero-art" aria-hidden="true"><div class="halo"></div><img width="900" height="710" src="/workshop.webp" alt=""><div class="art-datum">PW / 01</div></div>
 </div>
-<section class="selection"><div class="section-head"><h2 data-t="stages"></h2><span id="progress"></span></div><div id="stage-cards" class="stage-cards"></div></section>
+<section class="selection"><div class="section-head"><h2 data-t="stages"></h2><span id="progress"></span></div><div id="chapter-picker"></div><div id="stage-cards" class="stage-cards"></div></section>
 </section>
 <section id="game-screen" class="game-screen" hidden>
 <aside class="brief"><button class="quiet" data-act="stages"><i data-icon="grid"></i><span data-t="stages"></span></button>
-<div class="brief-body"><p class="eyebrow"><b></b><span data-t="chapterName"></span></p><h1 id="stage-name"></h1><p class="brief-tip" id="stage-tip"></p></div>
+<div class="brief-body"><p class="eyebrow"><b></b><span id="chapter-name"></span></p><h1 id="stage-name"></h1><p class="brief-tip" id="stage-tip"></p></div>
 <div class="record"><i data-icon="medal"></i><div><small data-t="target"></small><strong id="target"></strong></div></div>
 <div class="record"><i data-icon="wave"></i><div><small data-t="personal"></small><strong id="best"></strong></div></div>
 </aside>
 <div class="cabinet"><div class="game-title"><div><span class="kicker" id="stage-code"></span><h2 id="board-name"></h2></div><button data-act="pause" id="pause" class="icon" data-label="pause"><i data-icon="pause"></i></button></div>
 <div class="metal-frame"><div class="hud"><div><small data-t="shields"></small><span id="shields"></span></div><div><small data-t="shots"></small><strong id="shots"></strong></div><div><small data-t="score"></small><strong id="score"></strong></div></div>
-<div class="field"><canvas width="420" height="560" id="game" tabindex="0" role="application" data-label="fieldLabel"></canvas><div class="core-hud"><span class="core-diamond"></span><span data-t="core"></span><strong id="core"></strong><progress id="core-meter" max="1" value="1" data-label="core"></progress></div><div id="callout" class="callout" hidden></div></div>
+<div class="field"><canvas width="420" height="560" id="game" tabindex="0" role="application" data-label="fieldLabel"></canvas><div class="core-hud"><span class="core-diamond"></span><span data-t="core"></span><strong id="core"></strong><progress id="core-meter" max="1" value="1" data-label="core"></progress></div><div id="lock-status" class="lock-status" hidden></div><div id="callout" class="callout" hidden></div></div>
 <div class="deck"><span id="phase"></span><span id="orb-status"></span></div></div>
 <div class="shot-actions"><button data-act="fire" id="fire-btn" class="primary"><i data-icon="charge"></i><span id="fire-label"></span></button><button data-act="help" class="icon" data-label="guide"><i data-icon="help"></i></button></div><p class="control-hint" id="control-hint"></p></div>
 </section></main>

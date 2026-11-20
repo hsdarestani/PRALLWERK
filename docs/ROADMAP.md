@@ -1,5 +1,9 @@
 # Milestone status
 
+## Campaign expansion · version 0.3
+
+The free campaign now contains 180 distinct, sequentially unlocked boards in 12 chapters. A chapter selector, real machine-type core shields, and per-stage replay targets are live features of this build. Runes, permanent upgrades, a dedicated multi-phase boss and commercial modes are separate outstanding milestones.
+
 ## Slice 1 — delivered playable proof
 
 - Two original handcrafted stages with tested winning routes.
@@ -18,16 +22,16 @@
 
 ## Slice 2 — next priority, incomplete
 
-1. Add six distinct free stages for eight total; tune the full chapter for 10–25 minutes.
+1. The original eight-stage content target has been superseded by the requested 180-stage campaign. Tune chapter pacing with external playtesters.
 2. Add an actual telegraphed multi-phase mini-boss. Current energy cores are regular targets, not bosses.
 3. Implement the three rune choices every two volleys and their real effects. There is no rune system yet.
-4. Develop non-monetized upgrade paths and chapter-level progression beyond the current two-level local unlock.
+4. Develop non-monetized upgrade paths and chapter-level upgrade choices beyond sequential stage unlocks.
 5. Conduct physical iPhone Safari and Android Chrome QA, landscape/safe-area/accessibility testing and a measured midrange-device performance pass.
 6. Tune difficulty, trajectory readability, audio mix, mobile text sizes and repeat play from tester observations.
 
 ## Slice 3 — paid product, not started
 
-- Build and test 12 playable Neonhafen stages, a distinct boss and Endless Mode before advertising them.
+- Build and test 12 playable Neonhafen stages, a distinct boss and Endless Mode before advertising them as a separate premium campaign.
 - Implement real Stripe test checkout, verified signature and idempotent webhook fulfillment.
 - Implement server-side entitlements and email-based recovery, cancellation/pending/failure handling, payment E2E tests.
 - Establish legal provider identity, tax/price display and digital-content consent/consumer-rights review before live charging.

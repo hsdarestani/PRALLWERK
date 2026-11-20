@@ -1,7 +1,7 @@
 import {buildStage,CAMPAIGN_SIZE} from './campaign.ts';
 import type { Level, Tile } from './engine.ts';
 const tile = (id:string, kind:Tile['kind'], col:number, row:number, hp=1, links:string[]=[], flip=false):Tile => ({id,kind,x:32+col*52,y:64+row*52,w:44,h:44,hp,maxHp:hp,links,flip,flash:0});
-export const CONTENT_VERSION = 'werkstatt-0.1.0';
+export const CONTENT_VERSION = 'adventure-0.4.0';
 export const LEVELS:Level[] = [
   {id:1,maxVolleys:6,orbCount:5,
     tiles:[tile('core','core',3,0,9),tile('l1','conductor',2,2,2,['l2','s1']),tile('l2','conductor',3,2,2,['l1','l3','core']),tile('l3','conductor',4,2,2,['l2','s2']),tile('s1','crystal',1,1,2),tile('s2','crystal',5,1,2),tile('s3','crystal',1,3,1),tile('s4','crystal',5,3,1)]},

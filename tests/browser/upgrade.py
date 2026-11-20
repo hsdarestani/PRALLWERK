@@ -25,7 +25,7 @@ def switch(p, lang, dialog=False):
     expect(p.locator('html')).to_have_attribute('lang', 'de-DE' if lang=='de' else 'en')
 
 def profile(p):
-    return p.evaluate("JSON.parse(localStorage.getItem('prallwerk.save.v1'))")
+    return p.evaluate("JSON.parse(localStorage.getItem('prallwerk.save.v2'))")
 
 def ready(p):
     expect(p.locator('#phase')).to_have_text(re.compile('^(Ready|Schussbereit)$'), timeout=20000)
@@ -143,7 +143,7 @@ def controls(browser):
         gesture(p,.15,False);faster(p)
     expect(p.locator('#dialog-title')).to_have_text('Circuit broken.',timeout=20000)
     p.locator('#modal [data-act=again]').click();ready(p)
-    assert profile(p)['best']['1']==1700 and p.locator('#score').inner_text()=='0'
+    assert profile(p)['legacy']['best']['1']==1700 and p.locator('#score').inner_text()=='0'
     p.close()
 
 def layouts(browser):

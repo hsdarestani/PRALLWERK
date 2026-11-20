@@ -27,7 +27,7 @@ test('explicit locale wins, saved preference survives, unsupported inputs fall b
 });
 test('legacy profile retains scores, unlocks and accessibility settings',()=>{
   const p=readProfile(JSON.stringify({version:1,best:{1:1700},completed:[1],unlocked:2,settings:{sound:true,motion:false,contrast:true}}),false,null);
-  assert.deepEqual(p.best,{1:1700});assert.deepEqual(p.completed,[1]);assert.equal(p.unlocked,2);
+  assert.deepEqual(p.legacy.best,{1:1700});assert.deepEqual(p.legacy.completed,[1]);assert.deepEqual(p.completed,[]);assert.equal(p.unlocked,2);
   assert.deepEqual(p.settings,{sound:true,motion:false,contrast:true,language:'de',volume:.55});
 });
 test('malformed and partial profile data can open a new game',()=>{

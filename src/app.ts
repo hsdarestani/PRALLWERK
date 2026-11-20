@@ -1,4 +1,4 @@
-import {createState,fire,step,drainEvents,lockRemaining,chooseRune,RUNES,DT} from './engine.ts';
+import {createState,fire,step,drainEvents,lockRemaining,chooseRune,runeMode,RUNES,DT} from './engine.ts';
 import type {GameEvent,Rune} from './engine.ts';
 import {CHAPTERS,ROLES,PER_CHAPTER,chapterIndex,stageMotif} from './campaign.ts';
 import {LEVELS} from './levels.ts';
@@ -128,6 +128,10 @@ function phase():Key{
   if(s.balls.filter(b=>b.alive).every(b=>!b.delay&&b.vy>0))return 'returning';
   return 'flying';
 }
+function runeDescription(r:Rune):Key{
+  const mode=runeMode(s,r);
+  return mode==='normal'?({surge:'surgeDesc',bank:'bankDesc',pierce:'pierceDesc'} as const)[r]:mode;
+}
 function boardTip(){
   const special=s.level.special;
   return special?t(special==='circuit'?'circuitFinal':special):localized(CHAPTERS[chapterIndex(s.level.id)].tip);
@@ -196,7 +200,7 @@ function drawDialog(){
   let content='',actions='';
   switch(view){
     case 'runes':
-      content='<p class="kicker">'+t('runeTime')+'</p><div class="rune-list">'+RUNES.map((r,i)=>'<button class="rune" data-rune="'+r+'"><i aria-hidden="true">'+['ϟ','↗','⤓'][i]+'</i><span><strong>'+t(r)+'</strong><small>'+t(({surge:'surgeDesc',bank:'bankDesc',pierce:'pierceDesc'} as const)[r])+'</small></span></button>').join('')+'</div>';break;
+      content='<p class="kicker">'+t('runeTime')+'</p><div class="rune-list">'+RUNES.map((r,i)=>'<button class="rune" data-rune="'+r+'"><i aria-hidden="true">'+['ϟ','↗','⤓'][i]+'</i><span><strong>'+t(r)+'</strong><small>'+t(runeDescription(r))+'</small></span></button>').join('')+'</div>';break;
     case 'pause':
       actions=button('close','resume',true)+button('restart','restart')+button('stages','stages')+button('home','menu');break;
     case 'stages':

@@ -9,6 +9,8 @@ const copy = {
   practice:['Training','Practice'],practiceNote:['Trainingsrunde · keine Wertung','Practice run · unranked'],
   chooseRune:['Rune wählen','Choose a rune'],runeTime:['Für die nächsten zwei Salven','For the next two volleys'],
   surge:['Überladung','Overcharge'],bank:['Bandenschlag','Ricochet'],pierce:['Durchschlag','Piercing'],
+  lastSpark:['Ohne Leiter und Kapseln trägt der fünfte Funke die Ladung. Seine Kerntreffer verursachen vier Schaden.','With the circuit gone, the fifth spark carries the charge. Its core hits deal four damage.'],
+  bore:['Ohne Panzer und Splitter durchbohrt jeder Funke einmal den offenen Kern und verursacht zwei Schaden.','With no plates or crystals left, each spark can pass through the exposed core once for two damage.'],
   surgeDesc:['Kabelimpulse treffen doppelt so stark. Kapseln verursachen sechs statt vier Schaden.','Cable pulses hit twice as hard. Capsule blasts deal six damage instead of four.'],
   bankDesc:['Nach einer Reflexion an Wand, Spiegel oder Ventil verursacht der nächste Treffer doppelten Schaden.','After a wall, mirror or valve bounce, the next impact deals double damage.'],
   pierceDesc:['Jeder Funke durchdringt seine erste Panzerplatte oder seinen ersten Splitter und verursacht vier Schaden.','Each spark passes through its first plate or crystal and deals four damage.'],

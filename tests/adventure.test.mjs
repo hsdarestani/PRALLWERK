@@ -55,3 +55,12 @@ test('each rune changes an actual legal replay and has a board and shot where it
  }
  assert.deepEqual([...leads].sort(),[...RUNES].sort());
 });
+test('on a stripped field the picker offers last-spark charge or a through-core shot',()=>{
+ const stage=structuredClone(LEVELS[2]);stage.tiles=stage.tiles.filter(t=>t.kind==='core');delete stage.lock;
+ stage.tiles[0].x=188;stage.tiles[0].hp=stage.tiles[0].maxHp=100;
+ for(const [r,mode] of [['surge','lastSpark'],['pierce','bore'],['bank','normal']]){
+  const s=replay(stage,[0,0,r]);assert.equal(s.runeMode,mode);const before=s.tiles[0].hp;
+  playVolley(s,0);assert.ok(s.tiles[0].hp<before);
+  assert.deepEqual(replay(stage,s.inputLog),s);
+ }
+});

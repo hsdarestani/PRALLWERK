@@ -8,11 +8,17 @@ export interface Tile {id:string;kind:Kind;x:number;y:number;w:number;h:number;h
 export interface Level {id:number;maxVolleys:number;orbCount:number;special?:'circuit'|'bankOnly'|'garden'|'invert'|'shrapnel'|'induction';boss?:'walk'|'tide'|'commute'|'clock';lock?:{kind:"armor"|"conductor"|"crystal"|"charge" ;count:number};tiles:Tile[]}
 export interface Ball {x:number;y:number;vx:number;vy:number;delay:number;alive:boolean;banked:boolean;pierced:boolean;last:string;cooldown:number;trail:{x:number;y:number}[]}
 export interface GameEvent {type:string;x:number;y:number;toX?:number;toY?:number;value?:number;kind?:Kind}
-export interface State {level:Level;tiles:Tile[];balls:Ball[];status:'ready'|'flying'|'won'|'lost';tick:number;volleyTick:number;volley:number;hearts:number;score:number;destroyScore:number;chainScore:number;bonus:number;chains:number;bestChain:number;hits:number;returned:number;triggered:string[];pulses:{at:number;from:string;to:string}[];events:GameEvent[];inputLog:Command[];rune:Rune|null;runePending:boolean;phase:1|2;warning:boolean;fuses:{at:number;id:string}[];capped:boolean}
-export function createState(level:Level):State {return {level:structuredClone(level),tiles:structuredClone(level.tiles),balls:[],status:'ready',tick:0,volleyTick:0,volley:0,hearts:3,score:0,destroyScore:0,chainScore:0,bonus:0,chains:0,bestChain:0,hits:0,returned:0,triggered:[],pulses:[],events:[],inputLog:[],rune:null,runePending:false,phase:1,warning:false,fuses:[],capped:false};}
+export interface State {level:Level;tiles:Tile[];balls:Ball[];status:'ready'|'flying'|'won'|'lost';tick:number;volleyTick:number;volley:number;hearts:number;score:number;destroyScore:number;chainScore:number;bonus:number;chains:number;bestChain:number;hits:number;returned:number;triggered:string[];pulses:{at:number;from:string;to:string}[];events:GameEvent[];inputLog:Command[];rune:Rune|null;runeMode:"normal"|"lastSpark"|"bore";runePending:boolean;phase:1|2;warning:boolean;fuses:{at:number;id:string}[];capped:boolean}
+export function createState(level:Level):State {return {level:structuredClone(level),tiles:structuredClone(level.tiles),balls:[],status:'ready',tick:0,volleyTick:0,volley:0,hearts:3,score:0,destroyScore:0,chainScore:0,bonus:0,chains:0,bestChain:0,hits:0,returned:0,triggered:[],pulses:[],events:[],inputLog:[],rune:null,runeMode:"normal",runePending:false,phase:1,warning:false,fuses:[],capped:false};}
+export function runeMode(s:State,rune:Rune):State['runeMode']{
+  const has=(a:Kind,b:Kind)=>s.tiles.some(t=>t.hp>0&&(t.kind===a||t.kind===b));
+  if(rune==='surge'&&!has('charge','conductor'))return 'lastSpark';
+  if(rune==='pierce'&&!has('armor','crystal'))return 'bore';
+  return 'normal';
+}
 export function chooseRune(s:State,rune:Rune){
   if(s.status!=='ready'||!s.runePending||!RUNES.includes(rune))return false;
-  s.rune=rune;s.runePending=false;s.inputLog.push(rune);return true;
+  s.rune=rune;s.runeMode=runeMode(s,rune);s.runePending=false;s.inputLog.push(rune);return true;
 }
 const fixture=(t:Tile)=>t.kind==='mirror'||t.kind==='rotor'||t.kind==='gate';
 export function fire(s:State,angle:number):boolean {
@@ -116,9 +122,15 @@ export function step(s:State) {
       if(!(mirror?reflectMirror(b,t):reflectRect(b,t)))continue;
       b.last=t.id;b.cooldown=3;
       if(fixture(t)){b.banked=true;emit(s,'mirror',t);}
-      else if((t.kind==='armor'||t.kind==='crystal')&&s.rune==='pierce'&&!b.pierced){
-        b.pierced=true;damage(s,t,4);b.vx=vx;b.vy=vy;b.x=x;b.y=y;b.cooldown=14;
-      }else{damage(s,t,b.banked&&s.rune==='bank'?2:1,false,b.banked);b.banked=false;}
+      else if(s.rune==='pierce'&&!b.pierced&&(
+        t.kind==='armor'||t.kind==='crystal'||t.kind==='core'&&s.runeMode==='bore'&&!s.warning&&lockRemaining(s)===0
+        &&(b.banked||!['bankOnly','circuit'].includes(s.level.special||'')))){
+
+        b.pierced=true;damage(s,t,t.kind==='core'?2:4,false,b.banked);b.vx=vx;b.vy=vy;b.x=x;b.y=y;b.cooldown=14;
+      }else{
+        const charged=s.runeMode==='lastSpark'&&t.kind==='core'&&b===s.balls[s.balls.length-1];
+        damage(s,t,charged?4:b.banked&&s.rune==='bank'?2:1,false,b.banked);b.banked=false;
+      }
       break;}
   }
   if(s.tiles.some(t=>t.kind==='core'&&t.hp<=0)&&!s.pulses.length&&!s.fuses.length){finish(s);return;}

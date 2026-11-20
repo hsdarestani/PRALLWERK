@@ -208,7 +208,7 @@ function draw(s:State,angle:number,held:boolean,now:number,dt:number){
   for(const b of s.balls){if(!b.alive||b.delay>0)continue;
     const trail=motion?b.trail.slice(low?-4:-8):[];
     for(let i=1;i<trail.length;i++){const a=trail[i-1],z=trail[i];ctx.globalAlpha=i/trail.length*.68;line(a.x,a.y,z.x,z.y,'#9afcce',1+i/trail.length*3.3);}
-    ctx.globalAlpha=1;circle(b.x,b.y,7,'#9efbd32b');circle(b.x,b.y,4.2,'#e7ffdc');circle(b.x-1,b.y-1,1.5,'#fff');
+    ctx.globalAlpha=1;if(s.runeMode==='lastSpark'&&b===s.balls[s.balls.length-1])circle(b.x,b.y,9,undefined,C.amber,2);circle(b.x,b.y,7,'#9efbd32b');circle(b.x,b.y,4.2,'#e7ffdc');circle(b.x-1,b.y-1,1.5,'#fff');
   }
   paintBursts(dt);ctx.restore();
 }

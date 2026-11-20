@@ -1,7 +1,7 @@
 name: Arcade browser acceptance
 on:
   push:
-    branches: [feature/bilingual-arcade, feature/campaign-180]
+    branches: [feature/bilingual-arcade, feature/campaign-180, feature/campaign-adventure]
   workflow_dispatch:
 jobs:
   play:
@@ -26,14 +26,14 @@ jobs:
           else
             python -m playwright install --with-deps chromium
           fi
-      - name: Play both original levels with mouse and touch
+      - name: Capture the 180-stage release
         env:
           BASELINE_URL: http://127.0.0.1:4174
         run: |
-          git worktree add /tmp/prallwerk-baseline e3c6b7f
+          git worktree add /tmp/prallwerk-baseline 5e2eaa5e8cc9b0c1e890c9bba228383d1c0d734c
           (cd /tmp/prallwerk-baseline && node scripts/dev.mjs --port 4174) > /tmp/baseline.log 2>&1 &
           for i in {1..15}; do curl -fsS "$BASELINE_URL" > /dev/null && break; sleep 1; done
-          python tests/browser/baseline.py
+          python tests/browser/before_adventure.py
       - name: Play the bilingual release
         if: ${{ hashFiles('tests/browser/upgrade.py') != '' }}
         run: |

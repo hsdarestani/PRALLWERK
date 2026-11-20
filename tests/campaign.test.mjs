@@ -6,8 +6,8 @@ import {CHAPTERS,PER_CHAPTER} from '../src/campaign.ts';
 import {replay,createState,lockRemaining,step,fire} from '../src/engine.ts';
 import {readProfile,recordClear,masteryTarget} from '../src/save.ts';
 const routes=JSON.parse(readFileSync(new URL('./campaign-routes.json',import.meta.url)));
-test('180 distinct physical layouts fit the board and have valid circuits',()=>{
-  assert.equal(LEVELS.length,180);assert.equal(CHAPTERS.length*PER_CHAPTER,180);
+test('72 distinct physical layouts fit the board and have valid circuits',()=>{
+  assert.equal(LEVELS.length,72);assert.equal(CHAPTERS.length*PER_CHAPTER,72);
   const shapes=new Set();
   for(const [i,level] of LEVELS.entries()){
     assert.equal(level.id,i+1);
@@ -24,21 +24,21 @@ test('180 distinct physical layouts fit the board and have valid circuits',()=>{
 });
 test('every stage can be won and mastered through legal keyboard aim steps; unlocks survive every reload',()=>{
   let p=readProfile(null,false,'en');
-  assert.equal(routes.length,180);
+  assert.equal(routes.length,72);
   for(const [i,route] of routes.entries()){
     assert.equal(p.unlocked,i+1);
-    assert.ok(route.every(n=>Number.isInteger(n)&&Math.abs(n)<=29));
-    const state=replay(LEVELS[i],route.map(n=>n*.045));
+    assert.ok(route.every(n=>['bank','pierce','surge'].includes(n)||Number.isInteger(n)&&Math.abs(n)<=29));
+    const state=replay(LEVELS[i],route.map(n=>typeof n==='number'?n*.045:n));
     assert.equal(state.status,'won','stage '+(i+1));assert.ok(state.hearts>0);
     assert.ok(state.score>=masteryTarget(i+1));
     recordClear(p,i+1,state.score);p=readProfile(JSON.stringify(p),false,null);
     assert.equal(p.completed.length,i+1);assert.equal(p.best[i+1],state.score);
   }
-  assert.equal(p.unlocked,180);recordClear(p,2,100);assert.equal(p.best[2],2150);assert.equal(p.unlocked,180);
+  assert.equal(p.unlocked,72);recordClear(p,2,100);assert.equal(p.best[2],2150);assert.equal(p.unlocked,72);
 });
 test('a returning two-stage player starts at stage three with their original records',()=>{
   const p=readProfile(JSON.stringify({version:1,completed:[1,2],best:{1:1700,2:2150},unlocked:2}),false,null);
-  assert.equal(p.unlocked,3);assert.deepEqual(p.best,{1:1700,2:2150});
+  assert.equal(p.unlocked,3);assert.deepEqual(p.best,{});assert.deepEqual(p.legacy.best,{1:1700,2:2150});
 });
 test('shielded cores ignore physical hits until the required parts are cleared',()=>{
   const s=createState(LEVELS.find(l=>l.lock));const core=s.tiles.find(t=>t.kind==='core');

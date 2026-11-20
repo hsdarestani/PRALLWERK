@@ -10,7 +10,7 @@ export default {fetch(request){
   const url=new URL(request.url),lang=url.searchParams.get('lang')==='en'?'en':'de';
   const path=url.pathname==='/'?'/index.html':url.pathname;
   if(!['GET','HEAD'].includes(request.method))return new Response(labels[lang].method,{status:405,headers});
-  if(path==='/api/health')return Response.json({status:'ok',version:'0.3.0',preview:true,levels:180});
+  if(path==='/api/health')return Response.json({status:'ok',version:'0.4.0',preview:true,levels:72});
   if(!Object.hasOwn(assets,path))return new Response(labels[lang].notFound,{status:404,headers});
   const ext=path.split('.').pop();
   let body=assets[path];

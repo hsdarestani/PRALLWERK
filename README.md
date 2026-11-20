@@ -1,6 +1,6 @@
 # PRALLWERK
 
-A 180-stage, twelve-chapter physics arcade campaign starting in the Old Workshop. Drag to aim a five-orb volley. Hit conductors to send energy down connected cables and break the core before the machines breach the line.
+A 72-stage, twelve-chapter physics arcade campaign starting in the Old Workshop. Drag to aim a five-orb volley. Hit conductors to send energy down connected cables and break the core before the machines breach the line.
 
 [Deutsch](https://prallwerk.smarbiz.sbs/?lang=de) · [English](https://prallwerk.smarbiz.sbs/?lang=en)
 
@@ -8,7 +8,7 @@ A 180-stage, twelve-chapter physics arcade campaign starting in the Old Workshop
 
 Release the pointer to fire. With the keyboard, aim with Left/Right and fire with Space or Enter. Escape pauses. The fire button switches between normal and triple speed while a volley is in flight. The dotted guide simulates the lead orb through up to two collisions. The other four orbs follow at intervals and can encounter a changed board.
 
-Each victory unlocks the next stage. The chapter selector previews fifteen boards at a time. Shielded cores require clearing the specified number of conductors, armor plates or crystals. Each board has an attainable mastery target. Records, unlocked stages, audio, volume, effects, contrast and language persist in this browser. Refresh starts a new attempt. Switching languages keeps the current shot running. German is the initial language unless a supported query or saved preference selects English.
+Each victory unlocks the next stage. The chapter selector previews six boards at a time. Shielded cores require clearing the specified number of conductors, armor plates, capsules or crystals. Each board has an attainable mastery target. Records, unlocked stages, audio, volume, effects, contrast and language persist in this browser. Refresh starts a new attempt. Switching languages keeps the current shot running. German is the initial language unless a supported query or saved preference selects English.
 
 ## Development
 
@@ -33,8 +33,12 @@ The development server listens on port 3000. The test command builds the deploya
 
 [Browser workflow](.github/workflows/browser.yml) · [Original baseline QA](docs/QA.md) · [Milestone status](docs/ROADMAP.md) · [Product brief](docs/PRODUCT_BRIEF.md)
 
-The gameplay-evidence workflow artifact contains before/after screenshots, both languages and frame samples from the CI runner. Physical iPhone and Android performance and first-time player enjoyment still need external playtesting. The public preview provides 180 free stages with local records. Paid content and online challenges are later milestones.
+The gameplay-evidence workflow artifact contains before/after screenshots, both languages and frame samples from the CI runner. Physical iPhone and Android performance and first-time player enjoyment still need external playtesting. The public preview provides 72 free stages with local records. Paid content and online challenges are later milestones.
 
 ## Campaign content
 
-The two original boards keep their layouts and scores. Stages 3–180 combine fifteen authored formations with twelve chapter rules and a fixed per-stage arrangement of parts and circuitry. Each stage has a reproducible keyboard solution in `tests/campaign-routes.json`. Regenerate routes and mastery targets with `node scripts/solve-campaign.mjs`. The test suite replays all 180 wins, rejects duplicate physical layouts, and checks all 179 unlock transitions and the finale.
+Two tutorial boards preserve the original trajectories and scores. Each of the following 70 boards has its own fixed layout. Charges explode after 42 ticks, pivot mirrors rotate between volleys, and valves admit orbs in one direction. Four chapter finales have two phases. After every second surviving volley from stage 3 onward, choose a rune for the next two volleys. The choice is part of the deterministic replay.
+
+Stage links with `?practice=36` start unranked play on a specified board. Practice victories leave campaign progress and medals untouched. A normal campaign victory records the score locally.
+
+[Chapter guide, finale rules and save migration](docs/ADVENTURE.md)

@@ -1,4 +1,4 @@
-"""Open saved campaign checkpoints and play the actual boards through the keyboard."""
+"""Exercise every finale using keyboard shots and the visible rune picker."""
 import json
 import os
 from pathlib import Path
@@ -12,48 +12,68 @@ scores={}
 errors=[]
 with sync_playwright() as pw:
     browser=pw.chromium.launch(executable_path=os.getenv('CHROME_BIN') or None)
-    for initial in (3,15,90,179):
-        lang='de' if initial in (15,179) else 'en'
-        p=browser.new_page(viewport={'width':390 if lang=='de' else 1363,'height':844 if lang=='de' else 768})
-        p.on('pageerror',lambda e: errors.append(str(e)))
-        p.goto(base+'/?lang='+lang)
-        value={'version':1,'completed':list(range(1,initial)),'unlocked':initial if initial>3 else 2,'best':{'1':1700,'2':2150}}
-        p.evaluate("(s)=>localStorage.setItem('prallwerk.save.v1',JSON.stringify(s))",value)
+    for chapter in range(1,13):
+        stage=chapter*6
+        lang='de' if chapter%2 else 'en'
+        mobile=chapter%4 in (0,1)
+        p=browser.new_page(viewport={'width':390 if mobile else 1363,'height':844 if mobile else 768},has_touch=mobile)
+        p.on('pageerror',lambda e:errors.append(str(e)))
+        p.on('console',lambda m:errors.append(m.text) if m.type=='error' else None)
+        p.goto(base)
+        # Each legacy chapter endpoint is a real migration boundary.
+        old={'version':1,'completed':list(range(1,chapter*15)),'best':{'1':1700},'unlocked':chapter*15,'settings':{'language':lang}}
+        raw=json.dumps(old)
+        p.evaluate("(s)=>localStorage.setItem('prallwerk.save.v1',s)",raw)
         p.reload()
-        chapters=p.locator('#chapter-picker select')
-        assert chapters.locator('option').count()==12
-        chapters.select_option('11')
-        expect(p.locator('#stage-cards [data-stage="180"]')).to_be_disabled()
+        assert p.locator('#chapter-picker option').count()==12
+        assert p.locator('#stage-cards button').count()==6
         p.locator('#start').click()
-        stages=(179,180) if initial==179 else (initial,)
-        for id in stages:
-            expect(p.locator('#stage-code')).to_contain_text(str(id).zfill(2))
-            p.screenshot(path=out/f'campaign-stage-{id}.jpg',quality=88)
-            angle=0
-            for goal in routes[id-1]:
-                fire=p.get_by_role('button',name='Salve starten' if lang=='de' else 'Fire volley',exact=True)
-                fire.wait_for(timeout=30000)
-                board=p.locator('#game');board.focus()
-                key='ArrowRight' if goal>angle else 'ArrowLeft'
-                for _ in range(abs(goal-angle)):p.keyboard.press(key)
-                angle=goal
-                p.keyboard.press('Space')
-                fast=p.locator('#fire-btn')
-                if '×3' in fast.inner_text():fast.click()
-            expect(p.locator('#modal .result-total')).to_be_visible(timeout=30000)
-            data=p.evaluate("JSON.parse(localStorage.getItem('prallwerk.save.v1'))")
-            assert data['unlocked']==min(id+1,180) and id in data['completed']
-            assert data['best']['1']==1700
-            scores[id]=data['best'][str(id)]
-            if id<180:
-                p.locator('#modal [data-act=next]').click()
-                expect(p.locator('#stage-code')).to_contain_text(str(id+1).zfill(2))
-            else:
-                expect(p.locator('#dialog-title')).to_have_text('Alle 180 Level geschafft!')
-                assert p.locator('#modal [data-act=next]').count()==0
-                p.screenshot(path=out/'campaign-complete.jpg',quality=88)
+        expect(p.locator('#stage-code')).to_contain_text(str(stage).zfill(2))
+        if not mobile:
+            assert p.locator('#stage-name').evaluate('e=>e.scrollWidth<=e.clientWidth+1')
+        p.screenshot(path=out/f'finale-{stage:02d}-{lang}.jpg',quality=85)
+        angle=0
+        for goal in routes[stage-1]:
+            if isinstance(goal,str):
+                rune=p.locator(f'#modal [data-rune="{goal}"]')
+                expect(rune).to_be_visible(timeout=30000)
+                if stage==36:
+                    p.locator('#modal [data-lang=de]').click()
+                    expect(p.locator('#dialog-title')).to_have_text('Rune wählen')
+                    p.screenshot(path=out/'rune-picker-de.jpg',quality=88)
+                    p.locator('#modal [data-lang=en]').click()
+                rune.click()
+                continue
+            label='Salve starten' if lang=='de' else 'Fire volley'
+            p.get_by_role('button',name=label,exact=True).wait_for(timeout=30000)
+            p.locator('#game').focus()
+            key='ArrowRight' if goal>angle else 'ArrowLeft'
+            for _ in range(abs(goal-angle)):p.keyboard.press(key)
+            angle=goal
+            p.keyboard.press('Space')
+            if '×3' in p.locator('#fire-btn').inner_text():p.locator('#fire-btn').click()
+        expect(p.locator('#modal .result-total')).to_be_visible(timeout=30000)
+        data=p.evaluate("JSON.parse(localStorage.getItem('prallwerk.save.v2'))")
+        assert data['unlocked']==min(stage+1,72) and data['completed']==[stage]
+        assert data['legacy']['best']['1']==1700
+        assert p.evaluate("localStorage.getItem('prallwerk.save.v1')")==raw
+        scores[stage]=data['best'][str(stage)]
+        if stage<72:
+            p.locator('#modal [data-act=next]').click()
+            expect(p.locator('#stage-code')).to_contain_text(str(stage+1).zfill(2))
+        else:
+            assert p.locator('#modal [data-act=next]').count()==0
+            p.screenshot(path=out/'adventure-finale-result.jpg',quality=88)
+        print(stage,scores[stage],flush=True)
         p.close()
+    # Unranked links must never unlock the campaign or store competitive scores.
+    p=browser.new_page()
+    p.goto(base+'/?practice=1&lang=en')
+    for _ in range(2):
+        p.get_by_role('button',name='Fire volley',exact=True).click()
+        p.locator('#fire-btn').click()
+    expect(p.get_by_text('Practice run · unranked')).to_be_visible(timeout=30000)
+    assert p.evaluate("JSON.parse(localStorage.getItem('prallwerk.save.v2')).completed")==[]
     browser.close()
 assert not errors,errors
 (out/'campaign-checkpoints.json').write_text(json.dumps(scores,indent=2))
-print('Browser victories:',scores)

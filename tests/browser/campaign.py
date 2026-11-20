@@ -29,6 +29,8 @@ with sync_playwright() as pw:
         assert p.locator('#stage-cards button').count()==6
         p.locator('#start').click()
         expect(p.locator('#stage-code')).to_contain_text(str(stage).zfill(2))
+        if not mobile:
+            assert p.locator('#stage-name').evaluate('e=>e.scrollWidth<=e.clientWidth+1')
         p.screenshot(path=out/f'finale-{stage:02d}-{lang}.jpg',quality=85)
         angle=0
         for goal in routes[stage-1]:

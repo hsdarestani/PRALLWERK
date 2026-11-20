@@ -74,6 +74,8 @@ function localize(){
   el('stage-cards').innerHTML=cards();
   el('stage-code').textContent=(practice?t('practice')+' · ':'')+stageNumber(s.level.id)+' · '+localized(ROLES[(s.level.id-1)%6]);
   el('board-name').textContent=stageName(s.level.id);el('stage-name').textContent=stageName(s.level.id);
+  const longest=Math.max(...stageName(s.level.id).split(/\s+/).map(word=>word.length));
+  el('stage-name').className=longest>=13?'compound-title':longest>=8?'long-title':'';
   el('chapter-name').textContent=localized(CHAPTERS[chapterIndex(s.level.id)].name);
   el('stage-tip').textContent=s.level.id<=2?t(s.level.id===1?'tip1':'tip2'):boardTip();
   el('target').textContent=t('targetRule',{n:fmt(masteryTarget(s.level.id))});
